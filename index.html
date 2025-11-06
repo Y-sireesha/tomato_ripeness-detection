@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tomato Ripeness Detector 🍅</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8f9fa;
+      text-align: center;
+      padding: 30px;
+    }
+    h1 { color: #d63384; }
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      display: inline-block;
+    }
+    img {
+      margin-top: 15px;
+      max-width: 90%;
+      border-radius: 10px;
+    }
+    #status {
+      font-weight: bold;
+      font-size: 1.2em;
+      color: #0d6efd;
+    }
+    input[type="file"] {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🍅 Tomato Ripeness Detector</h1>
+  <div class="card">
+    <p>Select a tomato image and click "Detect Ripeness"</p>
+    <input type="file" id="fileInput" accept="image/*"><br><br>
+    <button onclick="uploadImage()">Detect Ripeness</button>
+    <p id="status"></p>
+    <img id="resultImage" src="" alt="">
+  </div>
+
+  <script>
+    async function uploadImage() {
+      const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
+      const status = document.getElementById('status');
+      const resultImage = document.getElementById('resultImage');
+
+      if (!file) {
+        status.textContent = "⚠️ Please choose a file first.";
+        return;
+      }
+
+      status.textContent = "⏳ Detecting ripeness...";
+      resultImage.src = "";
+
+      const formData = new FormData();
+      formData.append("image", file);
+
+      try {
+        // 🔗 Replace this URL with YOUR Render API endpoint
+        const apiUrl = "https://tomato-ripeness-detection.onrender.com/detect";
+
+        const res = await fetch(apiUrl, {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await res.json();
+
+        if (data.status) {
+          status.textContent = `✅ Result: ${data.status}`;
+          resultImage.src = "data:image/jpeg;base64," + data.image_base64;
+        } else {
+          status.textContent = "❌ Error: " + (data.error || "Unknown error");
+        }
+      } catch (err) {
+        status.textContent = "⚠️ Error connecting to API.";
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>

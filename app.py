@@ -3,6 +3,10 @@ import numpy as np
 import cv2
 import base64
 
+from flask import Flask, request, jsonify, send_from_directory
+import os
+
+
 app = Flask(__name__)
 
 # Ripeness Color Ranges in HSV
@@ -58,5 +62,11 @@ def detect():
         'image_base64': img_base64
     })
 
+@app.route('/index.html')
+def serve_index():
+    return send_from_directory(os.path.join(os.getcwd(), 'veg.py'), 'index.html')
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
+

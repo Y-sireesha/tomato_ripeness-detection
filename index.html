@@ -1,87 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tomato Ripeness Detector 🍅</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🍅 Tomato Camera Detector</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f8f9fa;
-      text-align: center;
-      padding: 30px;
-    }
-    h1 { color: #d63384; }
-    .card {
-      background: #fff;
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      display: inline-block;
-    }
-    img {
-      margin-top: 15px;
-      max-width: 90%;
-      border-radius: 10px;
-    }
-    #status {
-      font-weight: bold;
-      font-size: 1.2em;
-      color: #0d6efd;
-    }
-    input[type="file"] {
-      margin-top: 20px;
-    }
+    body { font-family: Arial, sans-serif; text-align: center; background:#f9f9f9; }
+    video, canvas, img { width: 90%; max-width: 400px; border-radius: 10px; margin-top: 10px; }
+    button { margin: 15px; padding: 10px 20px; background:#d63384; color:#fff; border:none; border-radius:8px; font-size:16px; }
+    #status { font-weight:bold; color:#0d6efd; margin-top:10px; }
   </style>
 </head>
 <body>
-  <h1>🍅 Tomato Ripeness Detector</h1>
-  <div class="card">
-    <p>Select a tomato image and click "Detect Ripeness"</p>
-    <input type="file" id="fileInput" accept="image/*"><br><br>
-    <button onclick="uploadImage()">Detect Ripeness</button>
-    <p id="status"></p>
-    <img id="resultImage" src="" alt="">
-  </div>
+  <h2>🍅 Tomato Ripeness Camera Detector</h2>
+  <video id="camera" autoplay playsinline></video><br>
+  <button onclick="capturePhoto()">Scan Tomato</button>
+  <p id="status"></p>
+  <canvas id="snapshot" style="display:none;"></canvas>
+  <img id="result" alt="Result Image"/>
 
   <script>
-    async function uploadImage() {
-      const fileInput = document.getElementById('fileInput');
-      const file = fileInput.files[0];
-      const status = document.getElementById('status');
-      const resultImage = document.getElementById('resultImage');
+    const video = document.getElementById('camera');
+    const canvas = document.getElementById('snapshot');
+    const result = document.getElementById('result');
+    const status = document.getElementById('status');
 
-      if (!file) {
-        status.textContent = "⚠️ Please choose a file first.";
-        return;
-      }
+    // Ask for camera
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+      .then(stream => video.srcObject = stream)
+      .catch(err => { status.textContent = "⚠️ Camera access denied: " + err; });
+
+    async function capturePhoto() {
+      const w = video.videoWidth;
+      const h = video.videoHeight;
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(video, 0, 0, w, h);
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg"));
+      const formData = new FormData();
+      formData.append("image", blob, "frame.jpg");
 
       status.textContent = "⏳ Detecting ripeness...";
-      resultImage.src = "";
-
-      const formData = new FormData();
-      formData.append("image", file);
 
       try {
-        // 🔗 Replace this URL with YOUR Render API endpoint
-        const apiUrl = "https://tomato-ripeness-detection.onrender.com/detect";
-
-        const res = await fetch(apiUrl, {
+        const res = await fetch("https://tomato-ripeness-detection-1.onrender.com/detect", {
           method: "POST",
           body: formData
         });
-
         const data = await res.json();
-
         if (data.status) {
-          status.textContent = `✅ Result: ${data.status}`;
-          resultImage.src = "data:image/jpeg;base64," + data.image_base64;
+          status.textContent = `✅ ${data.status}`;
+          if (data.image_base64) result.src = "data:image/jpeg;base64," + data.image_base64;
         } else {
-          status.textContent = "❌ Error: " + (data.error || "Unknown error");
+          status.textContent = "❌ " + (data.error || "Unknown error");
         }
-      } catch (err) {
-        status.textContent = "⚠️ Error connecting to API.";
-        console.error(err);
+      } catch (e) {
+        status.textContent = "⚠️ Network error";
       }
     }
   </script>

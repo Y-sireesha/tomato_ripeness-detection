@@ -6,15 +6,15 @@ import base64
 import os
 
 app = Flask(__name__)
-CORS(app)
+CORS(app)  # allows camera web page to access API
 
-# Serve the index.html (camera UI)
+# ✅ Serve the camera HTML page
 @app.route('/')
 def serve_index():
     return send_from_directory(os.path.join(os.getcwd(), 'veg.py'), 'index.html')
 
 
-# Tomato detection endpoint
+# ✅ Tomato ripeness detection API
 @app.route('/detect', methods=['POST'])
 def detect():
     if 'image' not in request.files:
@@ -24,35 +24,45 @@ def detect():
     npimg = np.frombuffer(file.read(), np.uint8)
     img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
 
+    if img is None:
+        return jsonify({"error": "Invalid image"}), 400
+
     # Convert to HSV
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
-    # Color ranges
-    ripened_lower = np.array([0, 150, 100])
+    # Color thresholds (tune as needed)
+    ripened_lower = np.array([0, 150, 100])     # red
     ripened_upper = np.array([10, 255, 255])
-    turning_lower = np.array([10, 100, 100])
+    turning_lower = np.array([10, 100, 100])    # yellow/orange
     turning_upper = np.array([25, 255, 255])
-    unripened_lower = np.array([35, 50, 50])
+    unripened_lower = np.array([35, 50, 50])    # green
     unripened_upper = np.array([85, 255, 255])
 
-    # Masks
+    # Create color masks
     mask_ripened = cv2.inRange(hsv, ripened_lower, ripened_upper)
     mask_turning = cv2.inRange(hsv, turning_lower, turning_upper)
     mask_unripened = cv2.inRange(hsv, unripened_lower, unripened_upper)
 
+    # Count pixels in each range
     ripened_count = cv2.countNonZero(mask_ripened)
     turning_count = cv2.countNonZero(mask_turning)
     unripened_count = cv2.countNonZero(mask_unripened)
 
-    # Determine ripeness
+    # Decide ripeness
     if ripened_count > turning_count and ripened_count > unripened_count:
-        status = "Ripened"
+        status = "🍅 Ripened"
+        color = (0, 0, 255)
     elif turning_count > unripened_count:
-        status = "Turning"
+        status = "🟡 Turning"
+        color = (0, 255, 255)
     else:
-        status = "Unripened"
+        status = "🟢 Unripened"
+        color = (0, 255, 0)
 
-    # Encode image (optional)
+    # Draw status text on image
+    cv2.putText(img, status, (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 1.2, color, 3)
+
+    # Encode result image
     _, buffer = cv2.imencode('.jpg', img)
     image_base64 = base64.b64encode(buffer).decode('utf-8')
 

@@ -1,71 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>🍅 Tomato Ripeness Detector</title>
-
+<title>Tomato Ripeness Detector</title>
 <style>
-body { text-align:center; font-family:Arial; padding:20px; }
-video, img { width:90%; max-width:400px; border-radius:10px; margin-top:10px; }
-button { padding:10px 20px; background:#d63384; color:white; border:none; border-radius:10px; }
-#status { margin-top:15px; font-size:18px; font-weight:bold; color:#0d6efd; }
+video,img{width:90%;max-width:400px;}
+button{padding:10px;background:red;color:white;}
 </style>
-
 </head>
 <body>
 
-<h2>🍅 Tomato Ripeness Detector</h2>
+<h2>Tomato Ripeness Detector</h2>
 
 <video id="camera" autoplay playsinline></video><br>
-<button onclick="capturePhoto()">📸 Scan Tomato</button>
+<button onclick="send()">Scan Tomato</button>
 <p id="status"></p>
-<canvas id="snapshot" style="display:none;"></canvas>
 <img id="result"/>
 
 <script>
-const video = document.getElementById("camera");
-const canvas = document.getElementById("snapshot");
-const result = document.getElementById("result");
-const statusTxt = document.getElementById("status");
+const API = "https://your-render-domain.onrender.com/detect";
 
-// Start back camera
-navigator.mediaDevices.getUserMedia({ video:{ facingMode:"environment" } })
-  .then(stream => video.srcObject = stream);
+navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}})
+.then(s=>camera.srcObject=s);
 
-// Capture and send image
-async function capturePhoto() {
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  canvas.getContext("2d").drawImage(video,0,0);
-  
-  const blob = await new Promise(res => canvas.toBlob(res,"image/jpeg"));
-  sendImage(blob);
-}
+async function send(){
+  const c=document.createElement("canvas");
+  c.width=camera.videoWidth;
+  c.height=camera.videoHeight;
+  c.getContext("2d").drawImage(camera,0,0);
 
-async function sendImage(blob){
+  const blob = await new Promise(r=>c.toBlob(r,"image/jpeg"));
+
   const fd = new FormData();
-  fd.append("image", blob, "photo.jpg");
+  fd.append("image", blob);
 
-  statusTxt.textContent = "Detecting...";
+  let res = await fetch(API,{method:"POST",body:fd});
+  let data = await res.json();
 
-  // IMPORTANT: FULL API URL
-  const apiURL = "https://tomato-ripeness-detection.onrender.com/detect";
-
-  try {
-    const res = await fetch(apiURL, { method:"POST", body:fd });
-    const data = await res.json();
-
-    if(data.status){
-      statusTxt.textContent = "✔ " + data.status;
-      result.src = "data:image/jpeg;base64," + data.image_base64;
-    } else {
-      statusTxt.textContent = "Error: " + data.error;
-    }
-
-  } catch (err){
-    statusTxt.textContent = "⚠️ Network error — cannot reach server.";
-    console.error(err);
-  }
+  status.textContent = data.status;
+  if(data.image_base64) result.src = "data:image/jpeg;base64," + data.image_base64;
 }
 </script>
 

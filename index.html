@@ -1,78 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🍅 Tomato Ripeness Detector</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; background: #fafafa; padding: 20px; }
-    h2 { color: #d63384; }
-    video, canvas, img { width: 90%; max-width: 400px; border-radius: 10px; margin-top: 10px; }
-    button { margin: 10px; padding: 10px 20px; background: #d63384; color: white; border: none; border-radius: 8px; font-size: 16px; }
-    #status { margin-top: 15px; font-weight: bold; color: #0d6efd; }
-  </style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🍅 Tomato Ripeness Detector</title>
+
+<style>
+body { text-align:center; font-family:Arial; padding:20px; }
+video, img { width:90%; max-width:400px; border-radius:10px; margin-top:10px; }
+button { padding:10px 20px; background:#d63384; color:white; border:none; border-radius:10px; }
+#status { margin-top:15px; font-size:18px; font-weight:bold; color:#0d6efd; }
+</style>
+
 </head>
 <body>
-  <h2>🍅 Tomato Ripeness Detector</h2>
-  <video id="camera" autoplay playsinline></video><br>
-  <button onclick="capturePhoto()">📸 Scan Tomato</button>
-  <input type="file" id="upload" accept="image/*" onchange="uploadPhoto(this)" />
-  <p id="status"></p>
-  <canvas id="snapshot" style="display:none;"></canvas>
-  <img id="result" alt="Result Image"/>
 
-  <script>
-    const video = document.getElementById('camera');
-    const canvas = document.getElementById('snapshot');
-    const result = document.getElementById('result');
-    const status = document.getElementById('status');
+<h2>🍅 Tomato Ripeness Detector</h2>
 
-    // 🎥 Start the camera
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-      .then(stream => video.srcObject = stream)
-      .catch(err => { status.textContent = "⚠️ Camera access denied: " + err; });
+<video id="camera" autoplay playsinline></video><br>
+<button onclick="capturePhoto()">📸 Scan Tomato</button>
+<p id="status"></p>
+<canvas id="snapshot" style="display:none;"></canvas>
+<img id="result"/>
 
-    // 📸 Capture photo and send to backend
-    async function capturePhoto() {
-      const w = video.videoWidth;
-      const h = video.videoHeight;
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(video, 0, 0, w, h);
-      const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg"));
-      sendImage(blob);
-    }
+<script>
+const video = document.getElementById("camera");
+const canvas = document.getElementById("snapshot");
+const result = document.getElementById("result");
+const statusTxt = document.getElementById("status");
 
-    // 📤 Upload photo manually
-    async function uploadPhoto(input) {
-      const file = input.files[0];
-      if (file) sendImage(file);
-    }
+// Start back camera
+navigator.mediaDevices.getUserMedia({ video:{ facingMode:"environment" } })
+  .then(stream => video.srcObject = stream);
 
-    // 🚀 Send image to API
-    async function sendImage(file) {
-      const formData = new FormData();
-      formData.append("image", file, "tomato.jpg");
-      status.textContent = "⏳ Detecting ripeness...";
+// Capture and send image
+async function capturePhoto() {
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext("2d").drawImage(video,0,0);
 
-      try {
-        // ✅ Correct Render API URL (same server)
-        const res = await fetch("/detect", {
-          method: "POST",
-          body: formData
-        });
+  const blob = await new Promise(res => canvas.toBlob(res,"image/jpeg"));
+  sendImage(blob);
+}
 
-        const data = await res.json();
-        if (data.status) {
-          status.textContent = `✅ ${data.status}`;
-          result.src = "data:image/jpeg;base64," + data.image_base64;
-        } else {
-          status.textContent = "❌ " + (data.error || "Unknown error");
-        }
-      } catch (e) {
-        console.error(e);
-        status.textContent = "⚠️ Network error — please check your connection.";
-      }
-    }
-  </script>
+async function sendImage(blob){
+  const fd = new FormData();
+  fd.append("image", blob, "photo.jpg");
+
+  statusTxt.textContent = "Detecting...";
+
+  const apiURL = "/detect";   // IMPORTANT — same domain, no CORS
+
+  const res = await fetch(apiURL, { method:"POST", body:fd });
+  const data = await res.json();
+
+  if(data.status){
+    statusTxt.textContent = "✔ " + data.status;
+    result.src = "data:image/jpeg;base64," + data.image_base64;
+  } else {
+    statusTxt.textContent = "Error: " + data.error;
+  }
+}
+</script>
+
 </body>
 </html>
+

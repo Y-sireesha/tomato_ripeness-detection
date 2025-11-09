@@ -5,64 +5,102 @@ import numpy as np
 import base64
 import os
 
-app = Flask(__name__, static_folder=".")
-CORS(app)  # allow frontend to call backend
+app = Flask(__name__)
+CORS(app)
 
-# ----------------------------------------------------------
-# SERVE INDEX.HTML
-# ----------------------------------------------------------
 @app.route("/")
-def serve_home():
+def home():
     return send_from_directory("veg", "index.html")
 
-# ----------------------------------------------------------
-# TOMATO RIPENESS DETECTION API
-# ----------------------------------------------------------
 @app.route("/detect", methods=["POST"])
 def detect():
     if "image" not in request.files:
-        return jsonify({"error": "Image file missing"}), 400
+        return jsonify({"error": "Image missing"}), 400
 
     file = request.files["image"]
-    npimg = np.frombuffer(file.read(), np.uint8)
-    img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
+    img_bytes = np.frombuffer(file.read(), np.uint8)
+    img = cv2.imdecode(img_bytes, cv2.IMREAD_COLOR)
 
     if img is None:
         return jsonify({"error": "Invalid image"}), 400
 
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    # ----------------------------------------------------------
+    # STEP 1 — Detect Tomato Shape Using Canny + Contours
+    # ----------------------------------------------------------
+    blurred = cv2.GaussianBlur(img, (11, 11), 0)
+    edges = cv2.Canny(blurred, 40, 150)
 
-    ripened_lower = np.array([0, 150, 100])
-    ripened_upper = np.array([10, 255, 255])
-    turning_lower = np.array([10, 100, 100])
-    turning_upper = np.array([25, 255, 255])
-    unripened_lower = np.array([35, 50, 50])
-    unripened_upper = np.array([85, 255, 255])
+    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    mask_ripened = cv2.inRange(hsv, ripened_lower, ripened_upper)
-    mask_turning = cv2.inRange(hsv, turning_lower, turning_upper)
-    mask_unripened = cv2.inRange(hsv, unripened_lower, unripened_upper)
+    tomato_contour = None
+    max_area = 0
 
-    r = cv2.countNonZero(mask_ripened)
-    t = cv2.countNonZero(mask_turning)
-    u = cv2.countNonZero(mask_unripened)
+    for cnt in contours:
+        area = cv2.contourArea(cnt)
+        if area < 2000:  # remove small noise
+            continue
 
-    if r > t and r > u:
+        peri = cv2.arcLength(cnt, True)
+        approx = cv2.approxPolyDP(cnt, 0.04 * peri, True)
+
+        # Roundish shapes = tomato
+        if len(approx) > 6 and area > max_area:
+            tomato_contour = cnt
+            max_area = area
+
+    if tomato_contour is None:
+        return jsonify({"status": "Tomato not detected"})
+
+    # Bounding box
+    x, y, w, h = cv2.boundingRect(tomato_contour)
+    crop = img[y:y+h, x:x+w]
+
+    # ----------------------------------------------------------
+    # STEP 2 — Ripeness Detection Using Dominant HSV Color
+    # ----------------------------------------------------------
+    hsv = cv2.cvtColor(crop, cv2.COLOR_BGR2HSV)
+
+    # Red
+    red1 = cv2.inRange(hsv, (0, 70, 50), (10, 255, 255))
+    red2 = cv2.inRange(hsv, (170, 70, 50), (180, 255, 255))
+    red_mask = red1 + red2
+
+    # Yellow/Orange
+    yellow_mask = cv2.inRange(hsv, (10, 60, 50), (25, 255, 255))
+
+    # Green
+    green_mask = cv2.inRange(hsv, (35, 60, 40), (85, 255, 255))
+
+    r = cv2.countNonZero(red_mask)
+    yel = cv2.countNonZero(yellow_mask)
+    g = cv2.countNonZero(green_mask)
+
+    # ----------------------------------------------------------
+    # DOMINANT RIPENESS = max color
+    # ----------------------------------------------------------
+    if r > yel and r > g:
         status = "Ripened"
-    elif t > u:
+        color = (0, 0, 255)
+    elif yel > g:
         status = "Turning"
+        color = (0, 255, 255)
     else:
         status = "Unripened"
+        color = (0, 255, 0)
+
+    # ----------------------------------------------------------
+    # DRAW RESULT
+    # ----------------------------------------------------------
+    cv2.rectangle(img, (x, y), (x + w, y + h), color, 3)
+    cv2.putText(img, status, (x, y - 10),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, color, 3)
 
     _, buffer = cv2.imencode(".jpg", img)
-    image_base64 = base64.b64encode(buffer).decode("utf-8")
+    encoded = base64.b64encode(buffer).decode("utf-8")
 
     return jsonify({
         "status": status,
-        "ripened_pixels": int(r),
-        "turning_pixels": int(t),
-        "unripened_pixels": int(u),
-        "image_base64": image_base64
+        "image_base64": encoded
     })
 
 

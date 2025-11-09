@@ -37,7 +37,7 @@ async function capturePhoto() {
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
   canvas.getContext("2d").drawImage(video,0,0);
-
+  
   const blob = await new Promise(res => canvas.toBlob(res,"image/jpeg"));
   sendImage(blob);
 }
@@ -48,16 +48,23 @@ async function sendImage(blob){
 
   statusTxt.textContent = "Detecting...";
 
-  const apiURL = "/detect";   // IMPORTANT — same domain, no CORS
+  // IMPORTANT: FULL API URL
+  const apiURL = "https://tomato-ripeness-detection.onrender.com/detect";
 
-  const res = await fetch(apiURL, { method:"POST", body:fd });
-  const data = await res.json();
+  try {
+    const res = await fetch(apiURL, { method:"POST", body:fd });
+    const data = await res.json();
 
-  if(data.status){
-    statusTxt.textContent = "✔ " + data.status;
-    result.src = "data:image/jpeg;base64," + data.image_base64;
-  } else {
-    statusTxt.textContent = "Error: " + data.error;
+    if(data.status){
+      statusTxt.textContent = "✔ " + data.status;
+      result.src = "data:image/jpeg;base64," + data.image_base64;
+    } else {
+      statusTxt.textContent = "Error: " + data.error;
+    }
+
+  } catch (err){
+    statusTxt.textContent = "⚠️ Network error — cannot reach server.";
+    console.error(err);
   }
 }
 </script>

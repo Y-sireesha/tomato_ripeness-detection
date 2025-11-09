@@ -1,6 +1,13 @@
 flask
+flask-cors
 gunicorn
 opencv-python-headless
 numpy
-flask-cors
+
+# YOLO Requirements
+ultralytics==8.2.0
+
+# PyTorch (CPU-only)
+torch==2.1.0
+torchvision==0.16.0
 

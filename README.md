@@ -195,36 +195,13 @@ Example output:
 
 ---
 
-# 📸 Screenshots
+# 📸 Project Screenshots
 
-## 🏠 Home Page
+<p align="center">
 
-> Replace this section with your screenshot.
+<img src="screenshots/project-overview.png" width="100%"/>
 
-```text
-screenshots/home.png
-```
-
----
-
-## 📤 Upload Image
-
-> Replace this section with your screenshot.
-
-```text
-screenshots/upload.png
-```
-
----
-
-## 📊 Prediction Result
-
-> Replace this section with your screenshot.
-
-```text
-screenshots/prediction.png
-```
-
+</p>
 ---
 
 # 📊 Technologies Used

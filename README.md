@@ -2,70 +2,83 @@
 
 # 🍅 AI Tomato Ripeness Detection
 
-### AI-based Tomato Ripeness Detection using Computer Vision
+### AI-Based Tomato Ripeness Detection Using Computer Vision & Deep Learning
 
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![OpenCV](https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white)
-![Flask](https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+<p align="center">
+<img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white"/>
+<img src="https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white"/>
+<img src="https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white"/>
+<img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white"/>
+<img src="https://img.shields.io/badge/HTML-E34F26?style=for-the-badge&logo=html5&logoColor=white"/>
+</p>
+
+<p>
+An AI-powered web application that predicts tomato ripeness from uploaded images using Computer Vision techniques.
+</p>
 
 </div>
 
 ---
 
-# 📌 Overview
+# 📖 Overview
 
-Tomato Ripeness Detection is an AI-powered web application that analyzes tomato images and predicts their ripeness using computer vision techniques.
+AI Tomato Ripeness Detection is a computer vision-based application designed to automatically determine the ripeness stage of tomatoes from images.
 
-The application allows users to upload an image of a tomato and receive a ripeness prediction, making it useful for agriculture, food processing, farmers, and quality inspection.
+The system allows users to upload a tomato image through a web interface, processes the image using computer vision techniques, and predicts the ripeness stage. The goal is to support farmers, agricultural businesses, food processing industries, and quality inspection systems by reducing manual grading and improving consistency.
 
 ---
 
 # 🎯 Problem Statement
 
-Manual tomato grading is time-consuming and often inconsistent because it depends on human judgment.
+Manual inspection of tomato ripeness is:
 
-This project aims to automate the ripeness detection process using image processing and machine learning techniques to improve accuracy and consistency.
+- Time-consuming
+- Subjective
+- Inconsistent
+- Labour-intensive
+
+This project automates the ripeness detection process using image processing and machine learning techniques, helping improve grading accuracy and reducing human effort.
 
 ---
 
 # ✨ Features
 
-- 🍅 Tomato ripeness prediction
+- 🍅 AI-based tomato ripeness prediction
 - 📷 Image upload support
-- ⚡ Fast prediction
-- 🖥️ User-friendly web interface
-- 🧠 AI-powered image analysis
-- 📱 Responsive design
+- ⚡ Fast prediction results
+- 🧠 Computer Vision image analysis
+- 🌐 Web-based interface
+- 📱 Responsive UI
 - 🐳 Docker support
+- 🚀 Easy deployment
 
 ---
 
-# 🛠️ Tech Stack
+# 🛠 Tech Stack
 
-### Programming Language
+## Programming Language
 
 - Python
 
-### Web Framework
+## Frontend
+
+- HTML5
+- CSS3
+- JavaScript
+
+## Backend
 
 - Flask
 
-### Computer Vision
+## Computer Vision
 
 - OpenCV
 
-### Machine Learning
+## Machine Learning
 
-- Python ML Model
+- Deep Learning Model
 
-### Frontend
-
-- HTML
-- CSS
-- JavaScript
-
-### Deployment
+## Deployment
 
 - Docker
 
@@ -74,16 +87,20 @@ This project aims to automate the ripeness detection process using image process
 # 📂 Project Structure
 
 ```
-tomato-ripeness-detection/
+AI-Tomato-Ripeness-Detection
 │
 ├── app.py
 ├── tomato_ripeness.py
+├── data.yaml
 ├── requirements.txt
 ├── Dockerfile
 ├── runtime.txt
-├── data.yaml
 ├── index.html
 ├── tomato.pt.url
+├── screenshots/
+│   ├── home.png
+│   ├── upload.png
+│   └── prediction.png
 └── README.md
 ```
 
@@ -91,33 +108,31 @@ tomato-ripeness-detection/
 
 # ⚙️ Installation
 
-## Clone the Repository
+## Clone Repository
 
 ```bash
-git clone https://github.com/Y-sireesha/tomato_ripeness-detection.git
+git clone https://github.com/Y-sireesha/AI-Tomato-Ripeness-Detection.git
 
-cd tomato_ripeness-detection
+cd AI-Tomato-Ripeness-Detection
 ```
 
 ---
 
 ## Create Virtual Environment
 
-```bash
-python -m venv venv
-```
-
-Activate
-
 ### Windows
 
 ```bash
+python -m venv venv
+
 venv\Scripts\activate
 ```
 
 ### Linux / macOS
 
 ```bash
+python3 -m venv venv
+
 source venv/bin/activate
 ```
 
@@ -131,13 +146,13 @@ pip install -r requirements.txt
 
 ---
 
-# ▶️ Run the Project
+# ▶️ Run the Application
 
 ```bash
 python app.py
 ```
 
-Open your browser and visit:
+Visit
 
 ```
 http://127.0.0.1:5000
@@ -145,19 +160,70 @@ http://127.0.0.1:5000
 
 ---
 
-# 📸 Application Workflow
+# 🔄 Workflow
 
-1. Upload a tomato image.
-2. The application preprocesses the image.
-3. Computer vision techniques analyze the image.
-4. The model predicts the ripeness.
-5. The prediction is displayed to the user.
+```
+Upload Tomato Image
+          │
+          ▼
+Image Preprocessing
+          │
+          ▼
+Computer Vision Processing
+          │
+          ▼
+AI Model Prediction
+          │
+          ▼
+Ripeness Classification
+          │
+          ▼
+Display Result
+```
 
 ---
 
-# 🍅 Prediction Categories
+# 🍅 Prediction
 
-The model is designed to classify tomato images into ripeness stages based on visual characteristics.
+The application predicts the ripeness stage based on image characteristics such as color and appearance.
+
+Example output:
+
+- Unripe
+- Partially Ripe
+- Ripe
+
+---
+
+# 📸 Screenshots
+
+## 🏠 Home Page
+
+> Replace this section with your screenshot.
+
+```text
+screenshots/home.png
+```
+
+---
+
+## 📤 Upload Image
+
+> Replace this section with your screenshot.
+
+```text
+screenshots/upload.png
+```
+
+---
+
+## 📊 Prediction Result
+
+> Replace this section with your screenshot.
+
+```text
+screenshots/prediction.png
+```
 
 ---
 
@@ -167,66 +233,50 @@ The model is designed to classify tomato images into ripeness stages based on vi
 |------------|---------|
 | Python | Backend Development |
 | Flask | Web Framework |
-| OpenCV | Image Processing |
+| OpenCV | Computer Vision |
 | HTML | User Interface |
 | CSS | Styling |
-| JavaScript | Frontend Interaction |
+| JavaScript | Client-side Functionality |
 | Docker | Containerization |
 
 ---
 
 # 🚀 Future Enhancements
 
-- 🌐 Live camera detection
-- 📱 Mobile application
+- 📹 Real-time webcam detection
+- 🤖 More accurate deep learning models
 - ☁️ Cloud deployment
-- 🤖 Improved deep learning model
-- 📈 Ripeness percentage estimation
-- 📦 Batch image prediction
-- 📊 Analytics dashboard
+- 📱 Android application
+- 🌾 Multi-fruit detection
+- 📈 Ripeness confidence score
+- 📊 Dashboard & analytics
+- 🌍 Multilingual support
 
 ---
 
-# 📸 Screenshots
+# 🤝 Contributing
 
-## Home Page
+Contributions are welcome.
 
-> Add a screenshot here.
-
-```
-screenshots/home.png
-```
-
----
-
-## Upload Image
-
-> Add a screenshot here.
-
-```
-screenshots/upload.png
-```
-
----
-
-## Prediction Result
-
-> Add a screenshot here.
-
-```
-screenshots/result.png
-```
-
----
-
-# 🤝 Contribution
-
-Contributions are welcome!
-
-1. Fork the repository
+1. Fork this repository
 2. Create a feature branch
+
+```bash
+git checkout -b feature-name
+```
+
 3. Commit your changes
+
+```bash
+git commit -m "Added new feature"
+```
+
 4. Push the branch
+
+```bash
+git push origin feature-name
+```
+
 5. Open a Pull Request
 
 ---
@@ -241,7 +291,9 @@ This project is licensed under the MIT License.
 
 ## Sireesha Y
 
-Final Year B.E. – Artificial Intelligence & Machine Learning
+**B.E. Artificial Intelligence & Machine Learning**
+
+PES Institute of Technology & Management, Shivamogga
 
 📧 Email: **sireeshay95@gmail.com**
 
@@ -253,6 +305,8 @@ Final Year B.E. – Artificial Intelligence & Machine Learning
 
 <div align="center">
 
-⭐ If you found this project useful, please consider giving it a **Star**!
+### ⭐ If you found this project helpful, consider giving it a Star!
+
+Made with ❤️ by **Sireesha Y**
 
 </div>
